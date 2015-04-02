@@ -1,9 +1,9 @@
 var main=function(){
 	waterfall();
 	var dataInt={"data":[{"src":'1.jpg'},{"src":'2.jpg'},{"src":'3.jpg'},{"src":'4.jpg'},{"src":'5.jpg'},{"src":'6.jpg'}]};
-	window.onscroll=function(){
+	$(window).on("scroll",function(){
 		if(checkScrollSlide){
-			var $par=$("#main");
+			/*var $par=$("#main");
 			//将数据块渲染到当前页面的尾部
 			for(var i=0,max=dataInt.data.length;i<max;i++){
 				var $box=$("<div></div>").attr("class","box");
@@ -12,10 +12,17 @@ var main=function(){
 				$img.appendTo($pic);
 				$pic.appendTo($box);
 				$box.appendTo($par);
-			}
+			}*/
+
+			$.each(dataInt.data,function(key,value){
+				var oBox=$("<div>").addClass("box").appendTo($('#main'));
+				var oPic=$("<div>").addClass("pic").appendTo(oBox);
+				//$("<img>").attr("src","images/"+$(value).attr("src")).appendTo(oPic);
+				//console.log($(value).attr("src"));
+			});
 			waterfall();
 		}
-	};
+	});
 	
 };
 function waterfall(){
@@ -48,8 +55,8 @@ function waterfall(){
 			$(value).css({
 				"position":"absolute",
 				"top":minH+"px",
-				//"left":minHIndex*BoxW+"px"
-				"left":$box[minHIndex].offsetLeft+"px"
+				"left":minHIndex*BoxW+"px"
+				//"left":$box.eq(minHIndex).offset().left-$box.eq(0).offset().left+"px"
 			});
 			hArr[minHIndex]=$(value).outerHeight()+minH;			
 		}
@@ -58,13 +65,15 @@ function waterfall(){
 
  //检测是否具备了加载数据块的条件
  function checkScrollSlide(){
- 	//var $box=$("#main").find(".box");
- 	var $box=$("#main>.box");
- 	var lastBoxH=$box[$box.length-1].offsetTop+Math.floor($box[$box.length-1].offsetHeight/2);
+ 	var $lastbox=$("#main>.box").last();
+ 	//在js中的元素的属性offsetTop，在jquery中用offset()方法及其属性top共同实现
+ 	var lastBoxH=$lastbox.offset().top+Math.floor($lastbox.Height()/2);
  	//document.body.scrollTop为混杂模式下获取body的滚动位置；document.documentElement.scrollTop为标准模式下获取滚动位置。
- 	var scrollTop=document.body.scrollTop||document.documentElement.scrollTop;
- 	var height=document.body.clientHeight||document.documentElement.clientHeight;
- 	return (lastBoxH<scrollTop+height)?true:false;
+ 	/*js实现方式*/ //var scrollTop=document.body.scrollTop||document.documentElement.scrollTop;
+ 	var scrollTop=$(window).scrollTop();
+ 	/*js实现方式*/ //var height=document.body.clientHeight||document.documentElement.clientHeight;
+ 	var documentH=$(window).height();
+ 	return (lastBoxH<scrollTop+documentH)?true:false;
  }
 
 $(document).ready(main);
