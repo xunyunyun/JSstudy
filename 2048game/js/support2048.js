@@ -1,16 +1,8 @@
-
-function getPosTopMobile(i,j){
+function getPosTop(i,j){
 	return cellSpace+i*(cellSideLength+cellSpace);
 }
-function getPosLeftMobile(i,j){
-	return cellSpace+j*(cellSideLength+cellSpace);
-}
-
-function getPosTop(i,j){
-	return 20+i*120;
-}
 function getPosLeft(i,j){
-	return 20+j*120;
+	return cellSpace+j*(cellSideLength+cellSpace);
 }
 
 function getNumberBackgroundColor(number){
@@ -28,17 +20,15 @@ function getNumberBackgroundColor(number){
 		case 2048:return "#09e";break;
 		case 4096:return "#a6c";break;
 		case 8192:return "#93c";break;
-
 	}
 	return "black";
-
 }
+
 function getNumberColor(number){
 	if(number<=4){
 		return "#776a65";
 	}
 	return "white";
-	
 }
 
 function nospace( board ){
@@ -49,7 +39,6 @@ function nospace( board ){
 		}
 	}
 	return true;
-
 }
 
 
@@ -100,9 +89,6 @@ function canMoveDown( board ){
 	}
 	return false;
 }
-
-
-
 
 function noBlockHorizontal( row,col1,col2,board){
 	for(var i= col1+1; i < col2; i++){

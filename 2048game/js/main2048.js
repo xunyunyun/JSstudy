@@ -7,8 +7,13 @@ gridContainerWidth = 0.92*documentWidth ;
 cellSideLength = 0.18*documentWidth ;
 cellSpace = 0.04*documentWidth ;
 
+
 $(document).ready(function() {
-	if(documentWidth<500){
+	if(documentWidth>500){
+		gridContainerWidth = 500 ;
+		cellSideLength = 100 ;
+		cellSpace = 20 ;	
+	}else{
 		prepareForMobile();
 	}
 	newgame();
@@ -35,26 +40,16 @@ function newgame(){
 }
 function init(){
 	for(var i = 0; i < 4; i ++){
-		for(var j = 0; j < 4; j ++){
-			var gridCell = $("#grid-cell-"+i+"-"+j);
-			if(documentWidth<500){
-				gridCell.css('top',getPosTopMobile(i,j));
-				gridCell.css('left',getPosLeftMobile(i,j));
-			}else{
-				gridCell.css('top',getPosTop(i,j));
-				gridCell.css('left',getPosLeft(i,j));
-			}
-			
-		}
-	}
-	for(var i = 0; i < 4; i ++){
 		board[i] = new Array();
 		hasConflicted[i] = new Array();
-
 		for(var j = 0; j < 4; j ++){
-			board[i][j] = 0;
-			hasConflicted[i][j] = false;
+			var gridCell = $("#grid-cell-"+i+"-"+j);
 
+			gridCell.css('top',getPosTop(i,j));
+			gridCell.css('left',getPosLeft(i,j));	
+
+			board[i][j] = 0;
+			hasConflicted[i][j] = false;	
 		}
 	}
 
@@ -63,7 +58,7 @@ function init(){
 }
 //根据board数组的值，对前端进行操作.
 function updateBoardView(){
-	$(".number-cell").remove();
+	$(".number-cell").remove();//清空number-cell元素，从新生成；
 	for(var i = 0; i < 4; i ++){
 		for(var j = 0; j < 4; j ++){
 			$("#grid-container").append('<div class="number-cell" id="number-cell-'+i+'-'+j+'"></div>');
@@ -71,25 +66,14 @@ function updateBoardView(){
 			if(board[i][j]==0){
 				theNumberCell.css('width','0');
 				theNumberCell.css('height','0');
-				if(documentWidth<500){
-					theNumberCell.css('top',getPosTopMobile(i,j)+cellSideLength/2);
-				theNumberCell.css('left',getPosLeftMobile(i,j)+cellSideLength/2);
-				}else{
-					theNumberCell.css('top',getPosTop(i,j)+50);
-					theNumberCell.css('left',getPosLeft(i,j)+50);
-				}			
+				theNumberCell.css('top',getPosTop(i,j)+cellSideLength/2);
+				theNumberCell.css('left',getPosLeft(i,j)+cellSideLength/2);
+						
 			}else{
-				if(documentWidth<500){
-					theNumberCell.css('width',cellSideLength+'px');
-					theNumberCell.css('height',cellSideLength+'px');
-					theNumberCell.css('top',getPosTopMobile(i,j));
-					theNumberCell.css('left',getPosLeftMobile(i,j));
-				}else{
-					theNumberCell.css('width','100px');
-					theNumberCell.css('height','100px');
-					theNumberCell.css('top',getPosTop(i,j));
-					theNumberCell.css('left',getPosLeft(i,j));
-				}
+				theNumberCell.css('width',cellSideLength+'px');
+				theNumberCell.css('height',cellSideLength+'px');
+				theNumberCell.css('top',getPosTop(i,j));
+				theNumberCell.css('left',getPosLeft(i,j));
 				theNumberCell.css('background-color',getNumberBackgroundColor(board[i][j]));
 				theNumberCell.css('color',getNumberColor(board[i][j]));
 				theNumberCell.text(board[i][j]);
@@ -111,7 +95,8 @@ function generateOneNumber(){
 	}
 
 	//随机一个位置
-	var randx = parseInt(Math.floor(Math.random()*4));//强制转化成整形
+    //方法一
+	/*var randx = parseInt(Math.floor(Math.random()*4));//强制转化成整形
 	var randy = parseInt(Math.floor(Math.random()*4));
 
 	var times = 0;
@@ -133,9 +118,27 @@ function generateOneNumber(){
 				}
 			}
 		}
+	}*/
+	//方法二(快速生成数字)
+	var emptyx=new Array();
+	var emptyy=new Array();
+	for(var i = 0; i < 4; i ++){
+		for(var j = 0; j < 4; j ++){
+			if(board[i][j]==0){
+				emptyx.push(i);
+				emptyy.push(j); 
+			}
+		}
 	}
+
+	var len = emptyx.length;
+	var index = parseInt(Math.floor(Math.random()*len));//会产生0到len-1的数字
+	var randx = emptyx[index];//强制转化成整形
+	var randy = emptyy[index];
+
 	//随机一个数字
 	var randNumber=Math.random()<0.5? 2 : 4;
+
 	//在随机位置上显示随机数字
 	board[randx][randy] = randNumber;
 	showNumberWithAnimation(randx,randy,randNumber);
@@ -288,7 +291,7 @@ function moveLeft(){
 						//move
 						showMoveAnimation(i,j,i,k);
 						//add
-						board[i][k] *= 2
+						board[i][k] += board[i][j];
 						board[i][j] = 0;
 						//add score
 						score +=board[i][k];
@@ -330,7 +333,7 @@ function moveRight(){
 					else if(board[i][k]==board[i][j]&&noBlockHorizontal(i,j,k,board)&&!hasConflicted[i][k]){
 						//move
 						showMoveAnimation(i,j,i,k);
-						board[i][k] *= 2
+						board[i][k] += board[i][j];
 						board[i][j] = 0;
 						score +=board[i][k];
 						updateScore(score);
@@ -371,10 +374,12 @@ function moveUp(){
 					else if(board[k][j]==board[i][j]&&noBlockVertical(k,i,j,board)&&!hasConflicted[k][j]){
 						//move
 						showMoveAnimation(i,j,k,j);
-						board[k][j] *= 2
+						board[k][j] += board[i][j];
 						board[i][j] = 0;
+
 						score +=board[k][j];
 						updateScore(score);
+
 						hasConflicted[k][j] = true;
 						continue;
 					}
@@ -412,8 +417,9 @@ function moveDown(){
 					else if(board[k][j]==board[i][j]&&noBlockVertical(i,k,j,board)&&!hasConflicted[k][j]){
 						//move
 						showMoveAnimation(i,j,k,j);
-						board[k][j] *= 2
+						board[k][j] += board[i][j];
 						board[i][j] = 0;
+
 						score +=board[k][j];
 						updateScore(score);
 						hasConflicted[k][j] = true;
